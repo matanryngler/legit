@@ -9,7 +9,7 @@ This project involves the creation of a service for provisioning customer tenant
 1. Set up a Keycloak instance inside a Docker container, with data persistency ensured using Docker volumes.
 2. Built a Flask application for interfacing with the Keycloak instance, with an HTTP endpoint for creating new realms. DNS subdomain validity is enforced for the realm names.
 3. Containerized the Flask application using Docker, and coordinated both the Flask and Keycloak containers using Docker Compose.
-4. Added password policy enforcement during realm creation in the Flask application.
+4. Added password policy enforcement for all realms in the Flask application.
 5. Incorporated functionality to list all the created realms.
 6. Configured Keycloak to use a PostgreSQL database running in a separate Docker container, which replaced local volume storage.
 
@@ -37,6 +37,12 @@ This command will pull the necessary images, build the Flask application image, 
 
     ```shell
     curl -X GET http://localhost:5001/list-realms
+
+3. To enforce a new password on all realms:
+
+    ```shell
+    curl -X PUT -H "Content-Type: application/json" -d '{"password_policy": "length(12) and specialChars(2)"}' http://localhost:5001/enforce-policy
+
 
 ## Future Improvements
 While the current project accomplishes the primary goal, there are several potential areas for improvement:
