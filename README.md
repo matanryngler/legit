@@ -18,8 +18,7 @@ This project involves the creation of a service for provisioning customer tenant
 To replicate this project, you'll need the following software installed on your machine:
 
 - **Docker**: Docker was used to containerize the Keycloak service and the Flask application, ensuring a consistent and reproducible environment. Docker can be downloaded from the [official website](https://www.docker.com/products/docker-desktop).
-- **Docker Compose**: Docker Compose is a tool for running multi-container Docker applications. It was instrumental in managing and
-
+- **Docker Compose**: Docker Compose is a tool for running multi-container Docker applications. It was instrumental in managing and coordinating the Keycloak and Flask containers. Docker Compose comes pre-installed with Docker Desktop.
 ## Instructions to Run
 
 1. Clone the repository and navigate to the project directory.
