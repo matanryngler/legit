@@ -1,12 +1,13 @@
 from flask import Flask, request
 import requests
 import re
+import os
 
 app = Flask(__name__)
 
-KEYCLOAK_URL = "http://keycloak:8080"
-KEYCLOAK_USERNAME = "admin"
-KEYCLOAK_PASSWORD = "admin"
+KEYCLOAK_URL = os.getenv('KEYCLOAK_URL', 'http://keycloak:8080')
+KEYCLOAK_USERNAME = os.getenv('KEYCLOAK_USERNAME', 'admin')
+KEYCLOAK_PASSWORD = os.getenv('KEYCLOAK_PASSWORD', 'admin')
 
 def get_admin_token():
     data = {
@@ -53,4 +54,30 @@ def list_realms():
     # Convert list of realms to a dictionary where the keys are the realm names
     return {"realms": {realm['realm']: realm for realm in realms}}, 200
 
+@app.route('/enforce-policy', methods=['PUT'])
+def enforce_policy():
+    new_password_policy = request.json.get('password_policy')
+    if not new_password_policy:
+        return {"error": "No password policy provided."}, 400
 
+    admin_token = get_admin_token()
+    headers = {"Authorization": f"Bearer {admin_token}"}
+
+    # Fetch all the realms
+    response = requests.get(f"{KEYCLOAK_URL}/auth/admin/realms", headers=headers)
+    response.raise_for_status()  # Raises a HTTPError if the response status is 4xx, 5xx
+    realms = response.json()
+
+    # Update each realm with the new password policy
+    for realm in realms:
+        realm_name = realm['realm']
+        update_password_policy(realm_name, new_password_policy, admin_token)
+
+    return {"success": "Password policy enforced successfully."}, 200
+
+
+def update_password_policy(realm_name, new_password_policy, admin_token):
+    headers = {"Authorization": f"Bearer {admin_token}"}
+    data = {"passwordPolicy": new_password_policy}
+    response = requests.put(f"{KEYCLOAK_URL}/auth/admin/realms/{realm_name}", headers=headers, json=data)
+    response.raise_for_status()  # Raises a HTTPError if the response status is 4xx, 5xx
