@@ -1,0 +1,39 @@
+version: '3.1'
+
+services:
+  db:
+    image: postgres
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: password
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  keycloak:
+    image: jboss/keycloak
+    environment:
+      DB_VENDOR: POSTGRES
+      DB_ADDR: db
+      DB_DATABASE: keycloak
+      DB_USER: keycloak
+      DB_PASSWORD: password
+      KEYCLOAK_USER: admin
+      KEYCLOAK_PASSWORD: admin
+    depends_on:
+      - db
+
+  flask:
+    build: .
+    volumes:
+      - .:/app
+    ports:
+      - 5001:5000
+    environment:
+      - FLASK_APP=app.py
+      - FLASK_RUN_HOST=0.0.0.0
+    depends_on:
+      - keycloak
+
+volumes:
+  db_data:
